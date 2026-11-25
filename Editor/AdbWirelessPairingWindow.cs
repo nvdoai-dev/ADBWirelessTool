@@ -935,16 +935,12 @@ internal sealed class AdbStatusPopup : EditorWindow
         EditorGUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
         if (_cancelLabel != null && GUILayout.Button(_cancelLabel, GUILayout.Width(100f)))
-        {
             Close();
-            GUIUtility.ExitGUI();
-        }
 
         if (GUILayout.Button(_confirmLabel, GUILayout.Width(100f)))
         {
             _confirmed = true;
             Close();
-            GUIUtility.ExitGUI();
         }
         EditorGUILayout.EndHorizontal();
         EditorGUILayout.Space(8f);
