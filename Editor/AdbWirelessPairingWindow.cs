@@ -488,8 +488,7 @@ public sealed class AdbWirelessPairingWindow : EditorWindow
                 _lastCommandOutput + Environment.NewLine + Environment.NewLine +
                 "If this computer has not been paired with the phone before, pair it first using the temporary pairing port and six-digit code. If it was already paired, check that the phone IP and connection port are correct.\n\nPair this computer now?",
                 "Pair first",
-                "Not now",
-                AdbStatusPopup.Status.Warning);
+                "Not now");
             _showPairing = pairNow;
         }
 
@@ -869,39 +868,27 @@ internal sealed class AdbStatusPopup : EditorWindow
 
     private string _message;
     private Status _status;
-    private string _confirmLabel;
-    private string _cancelLabel;
-    private bool _confirmed;
 
     internal static void Show(string title, string message, Status status)
     {
-        Open(title, message, status, "OK", null);
+        EditorApplication.delayCall += () => Open(title, message, status);
     }
 
     internal static bool Confirm(
         string title,
         string message,
         string confirmLabel,
-        string cancelLabel,
-        Status status)
+        string cancelLabel)
     {
-        var popup = Open(title, message, status, confirmLabel, cancelLabel);
-        return popup._confirmed;
+        return EditorUtility.DisplayDialog(title, message, confirmLabel, cancelLabel);
     }
 
-    private static AdbStatusPopup Open(
-        string title,
-        string message,
-        Status status,
-        string confirmLabel,
-        string cancelLabel)
+    private static void Open(string title, string message, Status status)
     {
         var popup = CreateInstance<AdbStatusPopup>();
         popup.titleContent = new GUIContent(title);
         popup._message = message;
         popup._status = status;
-        popup._confirmLabel = confirmLabel;
-        popup._cancelLabel = cancelLabel;
         popup.minSize = new Vector2(400f, 170f);
         popup.maxSize = new Vector2(620f, 400f);
         var mainWindow = EditorGUIUtility.GetMainWindowPosition();
@@ -912,8 +899,7 @@ internal sealed class AdbStatusPopup : EditorWindow
             mainWindow.y + (mainWindow.height - height) * 0.5f,
             width,
             height);
-        popup.ShowModalUtility();
-        return popup;
+        popup.ShowUtility();
     }
 
     private void OnGUI()
@@ -934,14 +920,8 @@ internal sealed class AdbStatusPopup : EditorWindow
 
         EditorGUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
-        if (_cancelLabel != null && GUILayout.Button(_cancelLabel, GUILayout.Width(100f)))
-            Close();
-
-        if (GUILayout.Button(_confirmLabel, GUILayout.Width(100f)))
-        {
-            _confirmed = true;
-            Close();
-        }
+        if (GUILayout.Button("OK", GUILayout.Width(100f)))
+            EditorApplication.delayCall += Close;
         EditorGUILayout.EndHorizontal();
         EditorGUILayout.Space(8f);
     }
